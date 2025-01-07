@@ -1,29 +1,26 @@
 import matplotlib.pyplot as plt
 import torch
 import typer
-from src.mlops_sample_project.data import CorruptMNISTDataset
-from src.mlops_sample_project.model import FashionMinistClassifierModel
+from data import corrupt_mnist
+from model import FashionMinistClassifierModel
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
-
-app = typer.Typer()
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu" if torch.backends.mps.is_available() else "cpu")
 
 
-@app.command()
-def train(lr: float = 1e-3, batch_size: int = 32, epochs: int = 10) -> None:
+def train(lr: float = 1e-3, batch_size: int = 32, epochs: int = 3) -> None:
     """Train a model on MNIST."""
     print("Training day and night")
     print(f"{lr=}, {batch_size=}, {epochs=}")
 
     model = FashionMinistClassifierModel().to(DEVICE)
-    train_set, _ = CorruptMNISTDataset()
+    train_set, _ = corrupt_mnist()
 
     train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size)
 
     loss_fn = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-    statistics: dict[str, list[float]] = {"train_loss": [], "train_accuracy": []}
+    statistics = {"train_loss": [], "train_accuracy": []}
     for epoch in range(epochs):
         model.train()
         for i, (img, target) in enumerate(train_dataloader):
@@ -42,36 +39,14 @@ def train(lr: float = 1e-3, batch_size: int = 32, epochs: int = 10) -> None:
                 print(f"Epoch {epoch}, iter {i}, loss: {loss.item()}")
 
     print("Training complete")
-    torch.save(model.state_dict(), "model.pth")
+    torch.save(model.state_dict(), "models/model.pth")
     fig, axs = plt.subplots(1, 2, figsize=(15, 5))
     axs[0].plot(statistics["train_loss"])
     axs[0].set_title("Train loss")
     axs[1].plot(statistics["train_accuracy"])
     axs[1].set_title("Train accuracy")
-    fig.savefig("training_statistics.png")
-
-
-@app.command()
-def evaluate(model_checkpoint: str) -> None:
-    """Evaluate a trained model."""
-    print("Evaluating like my life depended on it")
-    print(model_checkpoint)
-
-    model = FashionMinistClassifierModel().to(DEVICE)
-    model.load_state_dict(torch.load(model_checkpoint))
-
-    _, test_set = CorruptMNISTDataset()
-    test_dataloader = torch.utils.data.DataLoader(test_set, batch_size=32)
-
-    model.eval()
-    correct, total = 0, 0
-    for img, target in test_dataloader:
-        img, target = img.to(DEVICE), target.to(DEVICE)
-        y_pred = model(img)
-        correct += (y_pred.argmax(dim=1) == target).float().sum().item()
-        total += target.size(0)
-    print(f"Test accuracy: {correct / total}")
+    fig.savefig("reports/figures/training_statistics.png")
 
 
 if __name__ == "__main__":
-    app()
+    typer.run(train)

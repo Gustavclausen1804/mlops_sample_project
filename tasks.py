@@ -41,6 +41,11 @@ def model(ctx: Context) -> None:
     ctx.run(f"python src/{PROJECT_NAME}/model.py", echo=True, pty=not WINDOWS)
 
 @task
+def evaluate(ctx: Context, model_name: str) -> None:
+    """Evaluate model."""
+    ctx.run(f"python src/{PROJECT_NAME}/evaluate.py {model_name}", echo=True, pty=not WINDOWS)
+
+@task
 def train(ctx: Context) -> None:
     """Train model."""
     ctx.run(f"python src/{PROJECT_NAME}/train.py", echo=True, pty=not WINDOWS)
@@ -50,6 +55,11 @@ def test(ctx: Context) -> None:
     """Run tests."""
     ctx.run("coverage run -m pytest tests/", echo=True, pty=not WINDOWS)
     ctx.run("coverage report -m", echo=True, pty=not WINDOWS)
+    
+@task
+def visualize(ctx: Context, model_name: str) -> None:
+    """Visualize model."""
+    ctx.run(f"python src/{PROJECT_NAME}/visualize.py {model_name}", echo=True, pty=not WINDOWS)
 
 @task
 def docker_build(ctx: Context, progress: str = "plain") -> None:

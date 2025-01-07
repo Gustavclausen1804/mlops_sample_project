@@ -1,100 +1,49 @@
-from pathlib import Path
-import typer
 import torch
-import matplotlib.pyplot as plt  # only needed for plotting
-from mpl_toolkits.axes_grid1 import ImageGrid  # only needed for plotting
-from torch.utils.data import Dataset, TensorDataset
+import typer
 
 
-class CorruptMNISTDataset(Dataset):
-    """Dataset for corrupt MNIST."""
-
-    def __init__(self, raw_data_path: Path) -> None:
-        self.data_path = raw_data_path
-        self.train_images = []
-        self.train_target = []
-        self.test_images = None
-        self.test_target = None
+def normalize(images: torch.Tensor) -> torch.Tensor:
+    """Normalize images."""
+    return (images - images.mean()) / images.std()
 
 
-    def normalize(self, images: torch.Tensor) -> torch.Tensor:
-        """Normalize images."""
-        return (images - images.mean()) / images.std()
+def preprocess_data(raw_dir: str, processed_dir: str) -> None:
+    """Process raw data and save it to processed directory."""
+    train_images, train_target = [], []
+    for i in range(6):
+        train_images.append(torch.load(f"{raw_dir}/train_images_{i}.pt"))
+        train_target.append(torch.load(f"{raw_dir}/train_target_{i}.pt"))
+    train_images = torch.cat(train_images)
+    train_target = torch.cat(train_target)
 
-    def preprocess(self, output_folder: Path) -> None:
-        """Preprocess the raw data and save it to the output folder."""
-        print("Preprocessing data...")
+    test_images: torch.Tensor = torch.load(f"{raw_dir}/test_images.pt")
+    test_target: torch.Tensor = torch.load(f"{raw_dir}/test_target.pt")
 
-        # Load test data
-        self.test_images = torch.load(self.data_path / "test_images.pt").unsqueeze(1).float()
-        print(f"Shape of test_images: {self.test_images.shape}")
-        self.test_target = torch.load(self.data_path / "test_target.pt").long()
-        print(f"Shape of test_target: {self.test_target.shape}")
+    train_images = train_images.unsqueeze(1).float()
+    test_images = test_images.unsqueeze(1).float()
+    train_target = train_target.long()
+    test_target = test_target.long()
 
-        # Load train data
-        for i in range(6):
-            img = torch.load(self.data_path / f"train_images_{i}.pt").unsqueeze(1).float()
-            print(f"Shape of train_images_{i}: {img.shape}")
-            tgt = torch.load(self.data_path / f"train_target_{i}.pt").long()
-            print(f"Shape of train_target_{i}: {tgt.shape}")
-            self.train_images.append(img)
-            self.train_target.append(tgt)
+    train_images = normalize(train_images)
+    test_images = normalize(test_images)
 
-        # Concatenate and save processed data
-        self.train_images = torch.cat(self.train_images)
-        self.train_target = torch.cat(self.train_target)
-        
-        
-        # normalize the data
-        self.train_images = self.normalize(self.train_images)
-        self.test_images = self.normalize(self.test_images)
-        
-        train_set = TensorDataset(self.train_images, self.train_target)
-        test_set = TensorDataset(self.test_images, self.test_target)
-
-        torch.save(train_set, output_folder / "train_set.pt")
-        torch.save(test_set, output_folder / "test_set.pt")
-
-    def __len__(self) -> int:
-        """Return the length of the dataset."""
-        return len(self.train_images) if self.train_images else 0
-
-    def __getitem__(self, index: int):
-        """Return a given sample from the dataset."""
-        if not self.train_images:
-            raise ValueError("Dataset is not loaded. Run preprocess first.")
-        return self.train_images[index], self.train_target[index]
+    torch.save(train_images, f"{processed_dir}/train_images.pt")
+    torch.save(train_target, f"{processed_dir}/train_target.pt")
+    torch.save(test_images, f"{processed_dir}/test_images.pt")
+    torch.save(test_target, f"{processed_dir}/test_target.pt")
 
 
-def preprocess(raw_data_path: Path, output_folder: Path) -> None:
-    dataset = CorruptMNISTDataset(raw_data_path)
-    dataset.preprocess(output_folder)
+def corrupt_mnist() -> tuple[torch.utils.data.Dataset, torch.utils.data.Dataset]:
+    """Return train and test datasets for corrupt MNIST."""
+    train_images = torch.load("data/processed/train_images.pt")
+    train_target = torch.load("data/processed/train_target.pt")
+    test_images = torch.load("data/processed/test_images.pt")
+    test_target = torch.load("data/processed/test_target.pt")
 
-
-def show_image_and_target(images: torch.Tensor, target: torch.Tensor) -> None:
-    """Plot images and their labels in a grid."""
-    row_col = int(len(images) ** 0.5)
-    fig = plt.figure(figsize=(10.0, 10.0))
-    grid = ImageGrid(fig, 111, nrows_ncols=(row_col, row_col), axes_pad=0.3)
-    for ax, im, label in zip(grid, images, target):
-        ax.imshow(im.squeeze(), cmap="gray")
-        ax.set_title(f"Label: {label.item()}")
-        ax.axis("off")
-    plt.show()
-
-
-def main(raw_data_path: Path, output_folder: Path) -> None:
-    preprocess(raw_data_path, output_folder)
-    train_set: TensorDataset = torch.load(output_folder / "train_set.pt")
-    test_set: TensorDataset = torch.load(output_folder / "test_set.pt")
-
-    print(f"Size of training set: {len(train_set)}")
-    print(f"Size of test set: {len(test_set)}")
-    print(f"Shape of a training point {(train_set[0][0].shape, train_set[0][1].shape)}")
-    print(f"Shape of a test point {(test_set[0][0].shape, test_set[0][1].shape)}")
-
-    show_image_and_target(train_set.tensors[0][:25], train_set.tensors[1][:25])
+    train_set = torch.utils.data.TensorDataset(train_images, train_target)
+    test_set = torch.utils.data.TensorDataset(test_images, test_target)
+    return train_set, test_set
 
 
 if __name__ == "__main__":
-    typer.run(main)
+    typer.run(preprocess_data)
