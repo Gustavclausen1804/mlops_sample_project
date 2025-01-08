@@ -1,8 +1,8 @@
-# mlops_sample_project
+# mlops_sample_project 🚀
 
-This is sample project for machine learning operations. Tempalte is created by Nicki Skafte Detlefsen
+This is a sample project for machine learning operations. Template is created by Nicki Skafte Detlefsen.
 
-## Project structure
+## Project structure 📁
 
 The directory structure of the project looks like this:
 ```txt
@@ -49,7 +49,53 @@ The directory structure of the project looks like this:
 └── tasks.py                  # Project tasks
 ```
 
+Created using [mlops_template](https://github.com/SkafteNicki/mlops_template), a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting started with Machine Learning Operations (MLOps).
 
-Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
-a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting
-started with Machine Learning Operations (MLOps).
+## Docker 🐳
+
+### How to Build Train Docker Image 🛠️
+```bash
+docker build -f dockerfiles/train.dockerfile . -t train:latest
+```
+
+### How to Run Train Docker Image ▶️
+```bash
+docker run --name experiment1 train:latest
+```
+
+### How to Fetch Models File from Docker Container 📂
+```bash
+docker cp experiment1:models/model.pth models/model_experiment1.pth
+```
+
+### How to Evaluate with Docker 📊
+```bash
+docker build -f dockerfiles/evaluate.dockerfile . -t evaluate:latest
+docker run --name evaluate evaluate:latest
+```
+
+## How to Run Code with Hydra 🐍
+
+Ensure that `exp2.yaml` is defined.
+
+```bash
+python src/mlops_sample_project/train.py train_experiments=exp2
+```
+
+Output is saved to the outputs folder.
+
+## Installation 💻
+
+To install the project in editable mode, run the following command:
+
+```bash
+pip install -e .
+```
+
+To install the project in production mode, run the following command:
+
+```bash
+pip install .
+```
+
+in the root of the project.

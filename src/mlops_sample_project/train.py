@@ -1,19 +1,39 @@
+import logging
+import os
+from pathlib import Path
+
+import hydra
 import matplotlib.pyplot as plt
 import torch
 import typer
+from omegaconf import OmegaConf
 
 from mlops_sample_project.data import corrupt_mnist
-from mlops_sample_project.model import FashionMinistClassifierModel
+from mlops_sample_project.model import FashionMinistClassifierModel, create_model_from_model_params_yaml
+
+log = logging.getLogger(__name__)
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu" if torch.backends.mps.is_available() else "cpu")
+project_root = Path(__file__).resolve().parents[2]  # Adjust as needed
+config_path = str(project_root / "configs")
 
-
-def train(lr: float = 1e-3, batch_size: int = 32, epochs: int = 3) -> None:
+@hydra.main(config_path=config_path, config_name="default_config.yaml")
+def train(config) -> None:
     """Train a model on MNIST."""
-    print("Training day and night")
-    print(f"{lr=}, {batch_size=}, {epochs=}")
+    
+    log.info(f"configuration: \n {OmegaConf.to_yaml(config)}")
+    hparams = config.train_experiments
+    model_params_yaml = config.model_experiments.params
+    
+    torch.manual_seed(hparams["seed"])
+    print(f"Current working directory: {os.getcwd()}")
 
-    model = FashionMinistClassifierModel().to(DEVICE)
+    
+    epochs : int = hparams["epochs"]
+    lr : float = hparams["learning_rate"]
+    batch_size : int = hparams["batch_size"]    
+
+    model = create_model_from_model_params_yaml(model_params_yaml).to(DEVICE)
     train_set, _ = corrupt_mnist()
 
     train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size)
@@ -40,6 +60,10 @@ def train(lr: float = 1e-3, batch_size: int = 32, epochs: int = 3) -> None:
                 print(f"Epoch {epoch}, iter {i}, loss: {loss.item()}")
 
     print("Training complete")
+    if not os.path.exists("models"):
+        os.makedirs("models")
+    if not os.path.exists("reports/figures"):
+        os.makedirs("reports/figures")
     torch.save(model.state_dict(), "models/model.pth")
     fig, axs = plt.subplots(1, 2, figsize=(15, 5))
     axs[0].plot(statistics["train_loss"])
@@ -50,4 +74,4 @@ def train(lr: float = 1e-3, batch_size: int = 32, epochs: int = 3) -> None:
 
 
 if __name__ == "__main__":
-    typer.run(train)
+    train()

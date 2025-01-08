@@ -8,7 +8,7 @@ from mlops_sample_project.model import FashionMinistClassifierModel
 from mlops_sample_project.train import DEVICE
 
 
-def evaluate(model_checkpoint: str = "model.pth") -> None:
+def evaluate(model_checkpoint: str = typer.Argument("model.pth")) -> None:
     """Evaluate a trained model."""
     print("Evaluating like my life depended on it")
     print(model_checkpoint)

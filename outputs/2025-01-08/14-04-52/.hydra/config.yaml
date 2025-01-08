@@ -1,0 +1,5 @@
+train_experiments:
+  epochs: 1
+  learning_rate: 0.001
+  batch_size: 32
+  seed: 42

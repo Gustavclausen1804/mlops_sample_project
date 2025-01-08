@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -38,6 +39,9 @@ def visualize(model_checkpoint: str, figure_name: str = "embeddings.png") -> Non
     tsne = TSNE(n_components=2)
     embeddings = tsne.fit_transform(embeddings)
 
+    if not os.path.exists("reports/figures"):
+        os.makedirs("reports/figures")
+    
     plt.figure(figsize=(10, 10))
     for i in range(10):
         mask = targets == i
