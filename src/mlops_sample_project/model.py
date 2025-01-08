@@ -36,5 +36,6 @@ def main():
     output = model(dummy_input)
     print(f"Output shape: {output.shape}")
 
+
 if __name__ == "__main__":
     typer.run(main)

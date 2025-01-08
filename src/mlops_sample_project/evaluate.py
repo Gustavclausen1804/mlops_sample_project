@@ -1,13 +1,14 @@
-import typer
-from model import FashionMinistClassifierModel
-from data import corrupt_mnist
-from train import DEVICE
-import torch
 from pathlib import Path
-app = typer.Typer()
 
-@app.command()
-def evaluate(model_checkpoint: str) -> None:
+import torch
+import typer
+
+from mlops_sample_project.data import corrupt_mnist
+from mlops_sample_project.model import FashionMinistClassifierModel
+from mlops_sample_project.train import DEVICE
+
+
+def evaluate(model_checkpoint: str = "model.pth") -> None:
     """Evaluate a trained model."""
     print("Evaluating like my life depended on it")
     print(model_checkpoint)
@@ -27,8 +28,7 @@ def evaluate(model_checkpoint: str) -> None:
         correct += (y_pred.argmax(dim=1) == target).float().sum().item()
         total += target.size(0)
     print(f"Test accuracy: {correct / total}")
-    
+
+
 if __name__ == "__main__":
     typer.run(evaluate)
-
-    

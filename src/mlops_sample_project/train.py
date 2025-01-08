@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 import torch
 import typer
-from data import corrupt_mnist
-from model import FashionMinistClassifierModel
+
+from mlops_sample_project.data import corrupt_mnist
+from mlops_sample_project.model import FashionMinistClassifierModel
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu" if torch.backends.mps.is_available() else "cpu")
 

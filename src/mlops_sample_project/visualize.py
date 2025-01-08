@@ -1,12 +1,14 @@
 from pathlib import Path
+
 import matplotlib.pyplot as plt
 import torch
 import typer
-from data import corrupt_mnist
-from model import FashionMinistClassifierModel
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from train import DEVICE
+
+from mlops_sample_project.data import corrupt_mnist
+from mlops_sample_project.model import FashionMinistClassifierModel
 
 
 def visualize(model_checkpoint: str, figure_name: str = "embeddings.png") -> None:
@@ -14,13 +16,11 @@ def visualize(model_checkpoint: str, figure_name: str = "embeddings.png") -> Non
     model_path = Path("./models") / model_checkpoint
     model = FashionMinistClassifierModel().to(DEVICE)
     model_path = Path("./models") / model_checkpoint
-    model.load_state_dict(torch.load(model_path))    
+    model.load_state_dict(torch.load(model_path))
     model.eval()
     model.fc = torch.nn.Identity()
-    
+
     _, test_dataset = corrupt_mnist()
-
-
 
     embeddings, targets = [], []
     with torch.inference_mode():
