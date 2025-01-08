@@ -78,7 +78,7 @@ def main(cfg):
     
     params = cfg.model_experiments.params
     # Usage
-    model = from_model_params_yaml(params)
+    model = create_model_from_model_params_yaml(params)
     model = FashionMinistClassifierModel(params)
     print(f"Model architecture: {model}")
     print(f"Number of parameters: {sum(p.numel() for p in model.parameters())}")
