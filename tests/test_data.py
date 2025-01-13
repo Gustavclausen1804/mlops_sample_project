@@ -1,9 +1,13 @@
 import os
 import sys
 
+import pytest
+
 from src.mlops_sample_project.data import corrupt_mnist
+from tests import _PATH_DATA
 
 
+@pytest.mark.skipif(not os.path.exists(f"{_PATH_DATA}/processed/test_target.pt"), reason="Data files not found")
 def test_data():
     N_train = 30000
     N_test = 5000

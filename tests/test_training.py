@@ -11,7 +11,7 @@ from src.mlops_sample_project.model import create_model_from_model_params_yaml
 from . import _PATH_DATA
 
 
-@pytest.mark.skipif(not os.path.exists(_PATH_DATA), reason="Data files not found")
+@pytest.mark.skipif(not os.path.exists(f"{_PATH_DATA}/processed/test_target.pt"), reason="Data files not found")
 @pytest.mark.parametrize("batch_size", [32, 64])
 def test_training_loop(batch_size: int) -> None:
     # Set up Hydra configuration programmatically
