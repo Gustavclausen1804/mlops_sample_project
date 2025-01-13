@@ -1,14 +1,19 @@
+import os
+
 import hydra
+import pytest
 import torch
 from omegaconf import DictConfig
 
 from src.mlops_sample_project.data import corrupt_mnist
 from src.mlops_sample_project.model import create_model_from_model_params_yaml
 
-from . import _PROJECT_ROOT
+from . import _PATH_DATA
 
 
-def test_training_loop():
+@pytest.mark.skipif(not os.path.exists(_PATH_DATA), reason="Data files not found")
+@pytest.mark.parametrize("batch_size", [32, 64])
+def test_training_loop(batch_size: int) -> None:
     # Set up Hydra configuration programmatically
     with hydra.initialize(config_path="../configs"):
         cfg = hydra.compose(config_name="default_config.yaml")
@@ -20,7 +25,7 @@ def test_training_loop():
     # Create model and data loader
     model = create_model_from_model_params_yaml(model_params).to(DEVICE)
     train_set, _ = corrupt_mnist()
-    train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=train_hparams["batch_size"])
+    train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size)
 
     # Set up loss and optimizer
     loss_fn = torch.nn.CrossEntropyLoss()
