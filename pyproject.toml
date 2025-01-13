@@ -32,4 +32,4 @@ omit = ["tests/*"]
 
 [project.scripts]
 train = "mlops_sample_project.train:train"
-evaluate = "mlops_sample_project.evaluate:evaluate" 
+evaluate = "mlops_sample_project.evaluate:evaluate"

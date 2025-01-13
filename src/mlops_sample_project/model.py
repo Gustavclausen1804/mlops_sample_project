@@ -75,7 +75,7 @@ config_path = str(project_root / "configs")
 def main(cfg):
     print("Configuration:")
     print(OmegaConf.to_yaml(cfg))
-    
+
     params = cfg.model_experiments.params
     # Usage
     model = create_model_from_model_params_yaml(params)
