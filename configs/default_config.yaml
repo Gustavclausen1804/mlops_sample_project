@@ -1,6 +1,7 @@
 defaults:
   - model_experiments: model1
   - train_experiments: exp1
+  - _self_
 hydra:
   job:
     chdir: false
