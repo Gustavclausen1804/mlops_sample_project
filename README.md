@@ -38,6 +38,7 @@ The directory structure of the project looks like this:
 │   ├── __init__.py
 │   ├── test_api.py
 │   ├── test_data.py
+|   ├── test_training.py
 │   └── test_model.py
 ├── .gitignore
 ├── .pre-commit-config.yaml
