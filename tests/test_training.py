@@ -17,7 +17,7 @@ def test_training_loop(batch_size: int) -> None:
     # Set up Hydra configuration programmatically
     with hydra.initialize(config_path="../configs"):
         cfg = hydra.compose(config_name="default_config.yaml")
-    
+
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     model_params = cfg.model_experiments.params
     train_hparams = cfg.train_experiments

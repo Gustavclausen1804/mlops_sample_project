@@ -20,18 +20,18 @@ config_path = str(project_root / "configs")
 @hydra.main(config_path=config_path, config_name="default_config.yaml")
 def train(config) -> None:
     """Train a model on MNIST."""
-    
+
     log.info(f"configuration: \n {OmegaConf.to_yaml(config)}")
     hparams = config.train_experiments
     model_params_yaml = config.model_experiments.params
-    
+
     torch.manual_seed(hparams["seed"])
     print(f"Current working directory: {os.getcwd()}")
 
-    
+
     epochs : int = hparams["epochs"]
     lr : float = hparams["learning_rate"]
-    batch_size : int = hparams["batch_size"]    
+    batch_size : int = hparams["batch_size"]
 
     model = create_model_from_model_params_yaml(model_params_yaml).to(DEVICE)
     train_set, _ = corrupt_mnist()
@@ -75,4 +75,3 @@ def train(config) -> None:
 
 if __name__ == "__main__":
     train()
-
