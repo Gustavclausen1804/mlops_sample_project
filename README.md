@@ -100,3 +100,9 @@ pip install .
 ```
 
 in the root of the project.
+
+
+
+## Use DVC (Data version control) 📦
+
+https://skaftenicki.github.io/dtu_mlops/s6_the_cloud/using_the_cloud/
